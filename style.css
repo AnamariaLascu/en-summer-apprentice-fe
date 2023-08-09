@@ -3,31 +3,66 @@ body {
 }
 
 .events {
-  justify-content: center;
-  flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap; /* Permite trecerea pe linia următoare */
+  justify-content: flex-start; /* Așează cardurile la începutul rândului */
+  gap: 5px; /* Spațierea dorită între carduri */
 }
+.event-card {
+  flex: 0 0 calc(30% - 5px); 
+  margin: 10px;
+  /* Restul stilurilor pentru carduri */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.event-card:first-child {
+  margin-left: 20px; /* Margine doar pe partea stanga  */
+}
+
+
 
 h1 {
   text-align: center;
   font-size: 32px;
   font-weight: bold;
   margin-bottom: 12px;
-  color: #de411b;
+  color: #a610b1;
 }
 
-.events .event {
-  width: 300px;
-  border: 1px solid #ebf1f6;
-  box-shadow: 0 0 2px 0 rgba(145,158,171,.2), 0 12px 24px -4px rgba(145,158,171,.12);
-}
+
 
 .event-title {
-  color: #de411b
+  color: #a610b1;
 }
 
 .event img {
-  height: 100px;
+  height: 150px;
 }
+
+.event-img {
+  width: 20%;
+  height: auto;
+  border-radius: 0.25rem;
+  object-fit: cover;
+  margin-bottom: 1rem; /* Acesta este echivalentul clasei Tailwind mb-4 */
+}
+
+.btn {
+  background-color: #d77eef; /* Culoarea de fundal a butonului */
+  color: #ffffff; /* Culoarea textului butonului */
+  padding: 8px 16px; /* Padding pentru buton */
+  border-radius: 4px; /* Borda rotunjită a butonului */
+  font-size: 14px; /* Dimensiunea textului butonului */
+  cursor: pointer; /* Transformă cursorul în pointer când se trece peste buton */
+  transition: background-color 0.3s ease-in-out; /* Tranziție de culoare la hover */
+}
+
+.btn:hover {
+  background-color: #d77eef; /* Culoarea de fundal a butonului la hover */
+}
+
 
 #ticketType {
   width: 100%;
@@ -48,7 +83,7 @@ h1 {
 }
 
 .link-item {
-  color: #de411b
+  color: #760a83
 }
 
 .logo {
@@ -71,3 +106,10 @@ h1 {
   margin-bottom: 40px;
 }
 
+.content {
+  /* Restul stilurilor pentru conținut */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
