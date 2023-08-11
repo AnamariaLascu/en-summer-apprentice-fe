@@ -4,21 +4,43 @@ body {
 
 .events {
   display: flex;
-  flex-wrap: wrap; /* Permite trecerea pe linia următoare */
-  justify-content: flex-start; /* Așează cardurile la începutul rândului */
-  gap: 5px; /* Spațierea dorită între carduri */
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 5px; 
 }
 .event-card {
   flex: 0 0 calc(30% - 5px); 
-  margin: 10px;
-  /* Restul stilurilor pentru carduri */
+  margin: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  min-height: 200px;
 }
 
 .event-card:first-child {
-  margin-left: 20px; /* Margine doar pe partea stanga  */
+  margin-left: 20px;
+}
+
+.card {
+  width: 300px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.event-image {
+  max-width: 120px;
+  height: auto;
+  margin-top: 10px;
+
+  
+}
+
+.ticket-quantity-input{
+  width: 70px;
 }
 
 
@@ -35,6 +57,7 @@ h1 {
 
 .event-title {
   color: #a610b1;
+  text-align:center;
 }
 
 .event img {
@@ -46,21 +69,21 @@ h1 {
   height: auto;
   border-radius: 0.25rem;
   object-fit: cover;
-  margin-bottom: 1rem; /* Acesta este echivalentul clasei Tailwind mb-4 */
+  margin-bottom: 1rem;
 }
 
 .btn {
-  background-color: #d77eef; /* Culoarea de fundal a butonului */
-  color: #ffffff; /* Culoarea textului butonului */
-  padding: 8px 16px; /* Padding pentru buton */
-  border-radius: 4px; /* Borda rotunjită a butonului */
-  font-size: 14px; /* Dimensiunea textului butonului */
-  cursor: pointer; /* Transformă cursorul în pointer când se trece peste buton */
-  transition: background-color 0.3s ease-in-out; /* Tranziție de culoare la hover */
+  background-color: #d77eef;
+  color: #ffffff; 
+  padding: 8px 16px; 
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer; 
+  transition: background-color 0.3s ease-in-out; 
 }
 
 .btn:hover {
-  background-color: #d77eef; /* Culoarea de fundal a butonului la hover */
+  background-color: #d77eef; 
 }
 
 
@@ -74,6 +97,7 @@ h1 {
 
 .quantity {
   margin: 12px auto;
+  
 }
 
 #page-header {
@@ -113,3 +137,59 @@ h1 {
   align-items: center;
   justify-content: center;
 }
+
+
+
+/* Stilizare pentru cardurile de comandă */
+.order-card {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+}
+
+/* Stilizare pentru detaliile comenzii din interiorul cardului */
+.order-details {
+  padding: 10px;
+}
+
+.order-details p {
+  margin: 5px 0;
+}
+
+.order-details strong {
+  font-weight: bold;
+  color:#a610b1;
+}
+
+/* Stilizare pentru butoanele din dreapta comenzii */
+.order-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  gap: 5px;
+}
+
+
+.sort-buttons {
+  display: flex;
+  justify-content: center; 
+  margin-top: 20px; 
+  
+}
+.sort-buttons button {
+  margin: 0 10px;
+}
+
+
+
