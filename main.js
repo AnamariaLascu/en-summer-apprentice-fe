@@ -1,3 +1,6 @@
+//Imports
+import { removeLoader, addLoader} from './loader.js';
+
 // Navigate to a specific URL
 function navigateTo(url) {
   history.pushState(null, null, url);
@@ -7,22 +10,11 @@ function navigateTo(url) {
 function getHomePageTemplate() {
   return `
    <div id="content" >
-      
       <div class="events flex items-center justify-center flex-wrap">
       </div>
     </div>
   `;
 }
-
-
-
-// function getOrdersPageTemplate() {
-//   return `
-//     <div id="content">
-//     <h1 class="text-2xl mb-4 mt-8 text-center">Purchased Tickets</h1>
-//     </div>
-//   `;
-// }
 
 function getOrdersPageTemplate() {
   return `
@@ -60,27 +52,13 @@ function setupMobileMenuEvent() {
   }
 }
 
-// function setupPopstateEvent() {
-//   window.addEventListener('popstate', () => {
-//     const currentUrl = window.location.pathname;
-//     renderContent(currentUrl);
-//   });
-// }
-
 function setupPopstateEvent() {
   window.addEventListener('popstate', () => {
     const currentUrl = window.location.pathname;
     renderContent(currentUrl);
-    setupSortButtons(); // Adăugați această linie pentru a re-atașa evenimentele de sortare
+    setupSortButtons();
   });
 }
-
-
-
-// function setupInitialPage() {
-//   const initialUrl = window.location.pathname;
-//   renderContent(initialUrl);
-// }
 
 function setupSortButtons() {
   const sortAscendingBtn = document.getElementById('sortAscendingBtn');
@@ -94,31 +72,21 @@ function setupSortButtons() {
   });
 }
 
-
-
 function setupInitialPage() {
   const initialUrl = window.location.pathname;
   renderContent(initialUrl);
-
-  setupSortButtons(); // Adăugați această linie pentru a atașa evenimentele de sortare inițiale
 }
 
 
-async function renderOrders() {
-  const ordersData = await fetchOrders();
-  const ordersContainer = document.querySelector('.orders');
-  
-  // Golește containerul de comenzilor existente
-  ordersContainer.innerHTML = '';
-
-  // Iterează prin comenzile sortate și adaugă-le la container
-  for (const orderData of ordersData) {
-    const orderCard = await renderOrderCard(orderData);
-    ordersContainer.appendChild(orderCard);
-  }
-}
-
-
+// async function renderOrders() {
+//   const ordersData = await fetchOrders();
+//   const ordersContainer = document.querySelector('.orders');
+//   ordersContainer.innerHTML = '';
+//   for (const orderData of ordersData) {
+//     const orderCard = await renderOrderCard(orderData);
+//     ordersContainer.appendChild(orderCard);
+//   }
+// }
 
 async function sortOrders(ascending) {
   const ordersData = await fetchOrders();
@@ -127,7 +95,7 @@ async function sortOrders(ascending) {
   });
 
   const ordersContainer = document.querySelector('.orders');
-  ordersContainer.innerHTML = ''; // Golește containerul de comenzilor
+  ordersContainer.innerHTML = '';
 
   for (const orderData of ordersData) {
     const orderCard = await renderOrderCard(orderData);
@@ -135,16 +103,14 @@ async function sortOrders(ascending) {
   }
 }
 
-
-
-
-
-
-
-
 async function renderHomePage() {
   const mainContentDiv = document.querySelector('.main-content-component');
+  
   mainContentDiv.innerHTML = getHomePageTemplate();
+
+  addLoader();
+  
+  setTimeout(async () => {
 
   const eventsData = await fetchTicketEvents();
   const eventsContainer = document.querySelector('.events');
@@ -159,10 +125,7 @@ async function renderHomePage() {
   eventsData.forEach((eventData, index) => {
     const eventCard = document.createElement('div');
     eventCard.classList.add('event-card');
-
-
     const eventImage = eventImages[index];
-
     const contentMarkup = `
     <div class ="card">
       <header>
@@ -205,19 +168,32 @@ async function renderHomePage() {
       const ticketCategoryID = parseInt(ticketCategorySelect.value);
       const numberOfTickets = parseInt(quantityInput.value);
 
+      if (numberOfTickets === 0) {
+        toastr.error('You must select at least 1 ticket to place an order.');
+        return;
+      }
+
       const orderData = {
         eventID,
         ticketCategoryID:selectedTicketCategory,
         numberOfTickets
       };
 console.log(JSON.stringify(orderData));
+
+      addLoader();
       try {
         const response = await placeOrder(orderData);
         console.log('Order placed:', response);
-        // Aici puteți efectua acțiunile necesare după ce a fost plasată comanda
-      } catch (error) {
-        console.error('Error placing order:', error);
+        toastr.success('Order placed successfully!');
+      } catch (err) {
+        console.error('Error placing order:', err);
+        toastr.error('Error placing order');
       }
+      finally {
+        removeLoader();
+      }
+      ticketCategorySelect.value = eventData.ticketCategory[0].ticketCategoryId;
+      quantityInput.value = '0';
     });
 
     const dropdowns = eventCard.querySelector('.dropdowns');
@@ -228,7 +204,7 @@ console.log(JSON.stringify(orderData));
       const currentValue = parseInt(quantityInput.value);
     
       if (currentValue < 0) {
-        quantityInput.value = 0; // Setează valoarea la 0 dacă este introdus un număr negativ
+        quantityInput.value = 0;
       }
     });
 
@@ -246,6 +222,10 @@ console.log(JSON.stringify(orderData));
       }
     });
   });
+  setTimeout(() => {
+    removeLoader();
+  }, 200);
+}, 200);
 }
 
 
@@ -273,11 +253,10 @@ async function placeOrder(orderData) {
   const options = {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json', // Set the appropriate content type
-      // Add any additional headers if needed
+      'Content-Type': 'application/json',
     },
 
-    body: JSON.stringify(orderData), // Convert your data to JSON
+    body: JSON.stringify(orderData), 
   };
 
   try {
@@ -295,44 +274,6 @@ async function placeOrder(orderData) {
   }
 
 }
-
-
-
-// async function renderOrdersPage() {
-//   const mainContentDiv = document.querySelector('.main-content-component');
-//   mainContentDiv.innerHTML = getOrdersPageTemplate();
-
-//   const ordersData = await fetchOrders();
-
-//   const ordersContainer = document.createElement('div');
-//   ordersContainer.classList.add('orders');
-
-//   const ordersTitle = document.createElement('h1');
-//   ordersTitle.classList.add('orders-title');
-//   ordersContainer.appendChild(ordersTitle);
-
-//   ordersData.forEach(orderData => {
-//     const orderCard = document.createElement('div');
-//     orderCard.classList.add('order-card');
-
-//     const contentMarkup = `
-//       <div class="order-details">
-        
-//         <p><strong>Order ID:</strong> ${orderData.orderId}</p>
-//         <p><strong>Date:</strong> ${orderData.orderedAt}</p>
-//         <p><strong>Ticket Category:</strong> ${orderData.ticketCategory}</p>
-//         <p><strong>Number of Tickets:</strong> ${orderData.numberOfTickets}</p>
-//         <p><strong>Total Price:</strong> ${orderData.totalPrice}</p>
-//       </div>
-//     `;
-
-//     orderCard.innerHTML = contentMarkup;
-//     ordersContainer.appendChild(orderCard);
-//   });
-
-//   mainContentDiv.appendChild(ordersContainer);
-// }
-
 
 async function renderOrderCard(orderData) {
   const orderCard = document.createElement('div');
@@ -356,12 +297,13 @@ async function renderOrderCard(orderData) {
   return orderCard;
 }
 
-
-
 async function renderOrdersPage() {
   const mainContentDiv = document.querySelector('.main-content-component');
   mainContentDiv.innerHTML = getOrdersPageTemplate();
 
+  addLoader();
+
+  setTimeout(async () => {
   const ordersData = await fetchOrders();
 
   const ordersContainer = document.createElement('div');
@@ -378,11 +320,12 @@ async function renderOrdersPage() {
 
   mainContentDiv.appendChild(ordersContainer);
   setupSortButtons();
+
+  setTimeout(() => {
+    removeLoader();
+  }, 200);
+}, 200);
 }
-
-
-
-
 
 // Render content based on URL
 function renderContent(url) {
