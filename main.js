@@ -1,4 +1,4 @@
-//Imports
+ //Imports
 import { removeLoader, addLoader} from './loader.js';
 
 // Navigate to a specific URL
@@ -77,17 +77,6 @@ function setupInitialPage() {
   renderContent(initialUrl);
 }
 
-
-// async function renderOrders() {
-//   const ordersData = await fetchOrders();
-//   const ordersContainer = document.querySelector('.orders');
-//   ordersContainer.innerHTML = '';
-//   for (const orderData of ordersData) {
-//     const orderCard = await renderOrderCard(orderData);
-//     ordersContainer.appendChild(orderCard);
-//   }
-// }
-
 async function sortOrders(ascending) {
   const ordersData = await fetchOrders();
   ordersData.sort((a, b) => {
@@ -163,8 +152,10 @@ async function renderHomePage() {
     {
      const ticketCategorySelect= document.querySelector(`.ticket-category-${eventData.eventId}`);
      const selectedTicketCategory=ticketCategorySelect.value;
+
      console.log(selectedTicketCategory);
       const eventID = eventData.eventId; // ID-ul evenimentului
+      console.log(eventID);
       const ticketCategoryID = parseInt(ticketCategorySelect.value);
       const numberOfTickets = parseInt(quantityInput.value);
 
@@ -276,6 +267,7 @@ async function placeOrder(orderData) {
 }
 
 async function renderOrderCard(orderData) {
+  console.log(orderData);
   const orderCard = document.createElement('div');
   orderCard.classList.add('order-card');
 
@@ -291,10 +283,140 @@ async function renderOrderCard(orderData) {
       <button class="btn btn-modify">Modify</button>
       <button class="btn btn-delete">Delete</button>
     </div>
+
+    <div class="edit-controls hidden">
+    <label for="ticketCategoryInput">Ticket Category:</label>
+    <select id="ticketCategoryInput-${orderData.orderId}" class="ticket-category-input">
+        <option value=${orderData.ticketCategoryId} selected>${orderData.ticketCategory}</option>
+        <option value="${orderData.ticketCategory === "VIP" ? orderData.ticketCategoryId-4 : orderData.ticketCategoryId+4}">${orderData.ticketCategory === "VIP" ? "Standard" : "VIP"}</option>
+    </select>
+    <label for="numTicketsInput">Number of Tickets:</label>
+    <input type="number" class="num-tickets-input" value="${orderData.numberOfTickets}">
+    <button class="btn btn-save">Save</button>
+    <button class="btn btn-cancel">Cancel</button>
+  </div>
   `;
 
   orderCard.innerHTML = contentMarkup;
-  return orderCard;
+
+    const deleteButton = orderCard.querySelector('.btn-delete');
+    const modifyButton = orderCard.querySelector('.btn-modify');
+    const editControls = orderCard.querySelector('.edit-controls');
+    const ticketCategoryInput = editControls.querySelector('.ticket-category-input');
+    const numTicketsInput = editControls.querySelector('.num-tickets-input');
+    const saveButton = editControls.querySelector('.btn-save');
+    const cancelButton = editControls.querySelector('.btn-cancel');
+  
+    modifyButton.addEventListener('click', () => {
+      editControls.classList.remove('hidden');
+      // ticketCategoryInput.innerHTML = `
+      //   <option value="Standard">Standard</option>
+      //   <option value="VIP">VIP</option>
+      // `;
+      ticketCategoryInput.value = orderData.ticketCategory;
+      numTicketsInput.value = orderData.numberOfTickets;
+    });
+  
+    saveButton.addEventListener('click', async () => {
+      const newTicketCategory = ticketCategoryInput.value;
+      const newNumTickets = parseInt(numTicketsInput.value);
+  
+      if (newNumTickets <= 0) {
+        toastr.error('Invalid input. Please provide a valid number of tickets.');
+        return;
+      }
+  
+      try {
+        const response = await patchOrders(orderData.orderId, newNumTickets,newTicketCategory );
+        if (response != null) {
+          if(newTicketCategory<5){
+            orderData.ticketCategory ="Standard";
+          }
+          else {
+            orderData.ticketCategory ="VIP";
+          }
+          //orderData.ticketCategory = newTicketCategory;
+          orderData.numberOfTickets = newNumTickets;
+          orderData.totalPrice = response.totalPrice;
+          editControls.classList.add('hidden');
+          // Re-render the card to reflect the updated data
+          const updatedOrderCard = await renderOrderCard(orderData);
+          orderCard.replaceWith(updatedOrderCard);
+        } else {
+          toastr.error('Error updating order on the server.');
+        }
+      } catch (error) {
+        console.error(error);
+        toastr.error('An error occurred while updating the order.');
+      }
+    });
+  
+    cancelButton.addEventListener('click', () => {
+      editControls.classList.add('hidden');
+    });
+
+    deleteButton.addEventListener('click', async () => {
+      const confirmation = window.confirm('Are you sure you want to delete this order?');
+      if (confirmation) {
+        const deletionResult = await deleteOrder(orderData.orderId);
+  
+        if (deletionResult.success) {
+          orderCard.remove();
+          console.log('Successful deletion');
+        } else {
+          console.error(deletionResult.message);
+        }
+      }
+    });
+
+  
+    return orderCard;
+  }
+  
+async function deleteOrder(orderId) {
+  try {
+    const response = await fetch(`https://localhost:7011/api/Order/Delete?id=${orderId}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      return { success: true, message: 'Event deleted successfully.' };
+
+    } else {
+      const errorData = await response.json();
+      return { success: false, message: errorData.message };
+    }
+
+  } catch (error) {
+    return { success: false, message: 'An error occurred while deleting the event.' };
+  }
+}
+
+async function patchOrders(orderId, numberOfTickets, ticketCategoryId) {
+  const url = `https://localhost:7011/api/Order/Patch`;
+  const patchData = {
+    orderId: orderId,
+    numberOfTickets: numberOfTickets,
+    ticketCategoryId: ticketCategoryId
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(patchData)
+    });
+   console.log(response);
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 async function renderOrdersPage() {
@@ -316,6 +438,7 @@ async function renderOrdersPage() {
   for (const orderData of ordersData) {
     const orderCard = await renderOrderCard(orderData);
     ordersContainer.appendChild(orderCard);
+  
   }
 
   mainContentDiv.appendChild(ordersContainer);
@@ -335,7 +458,7 @@ function renderContent(url) {
   if (url === '/') {
     renderHomePage();
   } else if (url === '/orders') {
-    renderOrdersPage()
+    renderOrdersPage();
   }
 }
 
