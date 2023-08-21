@@ -8,6 +8,14 @@ body {
   justify-content: flex-start;
   gap: 5px; 
 }
+
+body {
+  background-image: url('src/assets/background.webp'); 
+  background-size: cover; 
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
 .event-card {
   flex: 0 0 calc(30% - 5px); 
   margin: 20px;
@@ -41,6 +49,8 @@ body {
 
 .ticket-quantity-input{
   width: 70px;
+  text-align: center; /* Center the text within the input */
+ 
 }
 
 
@@ -97,14 +107,17 @@ h1 {
 
 .quantity {
   margin: 12px auto;
+  margin-left:20px;
   
 }
 
 #page-header {
-  background-color: #fff;
+  
   position: sticky;
   top: 0;
+ 
 }
+
 
 .link-item {
   color: #760a83
@@ -191,5 +204,10 @@ h1 {
   margin: 0 10px;
 }
 
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px; /* Pentru a adăuga spațiu între căutare și lista de evenimente */
+}
 
 
